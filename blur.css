@@ -1,0 +1,61 @@
+/*
+ * Image-bearing elements:
+ *   - thumbnails: <a href="…bild=ID"> holding a transparent placeholder <img>
+ *     with the real picture as a background
+ *   - single-image page: the direct parent of img.picshadow (the picture sits
+ *     under a right-click protection layer, so we blur the container)
+ *
+ * Until an image has been checked it is blurred ("pre-blur"), unless
+ * content.js has put .dtb-nopre on <html> (pre-blur off, or no tags chosen).
+ */
+
+/* NB: no whitespace between :is(…) and :not(…); a space would make it a
+   descendant selector and blur the insides of cleared thumbnails. */
+html:not(.dtb-nopre) :is(
+    a[href*="bild="]:is([style*="background"], :has(img:not([src*="/pres/bnrs/"]))),
+    div:has(> img.picshadow)
+  ):not(.dtb-ok):not(.dtb-blocked):not(.dtb-revealed) {
+  filter: blur(var(--dtb-blur, 24px)) !important;
+  clip-path: inset(0); /* keep the blur from bleeding outside the box */
+}
+
+/*
+ * Matched images: instead of blurring the element itself (which would blur
+ * the label too), cover it with an overlay that blurs what is behind it and
+ * carries the label in sharp text. content.js makes the element a
+ * positioning context and fills data-dtb-label.
+ */
+.dtb-blocked:not(.dtb-revealed) {
+  cursor: zoom-in !important;
+}
+
+.dtb-blocked:not(.dtb-revealed)::after {
+  content: attr(data-dtb-label);
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  box-sizing: border-box;
+  border-radius: inherit;
+  white-space: pre-line;
+  text-align: center;
+  font: 600 14px/1.35 system-ui, sans-serif;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+  background: rgba(20, 20, 20, 0.35);
+  -webkit-backdrop-filter: blur(var(--dtb-blur, 24px));
+  backdrop-filter: blur(var(--dtb-blur, 24px));
+  pointer-events: none;
+  overflow: hidden; /* never spill text onto neighbouring pictures */
+  overflow-wrap: anywhere;
+}
+
+.dtb-blocked[data-dtb-small]:not(.dtb-revealed)::after {
+  content: attr(data-dtb-short);
+  padding: 4px;
+  font-size: 11px;
+  line-height: 1.2;
+}

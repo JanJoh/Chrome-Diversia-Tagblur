@@ -1,0 +1,142 @@
+# Diversia Tag Blur
+
+🇸🇪 [Svenska](README.md)
+
+> **GenAI project.** The code, documentation and images in this repository were
+> produced with generative AI (Claude). No proofreading or independent review has been
+> done. Use at your own discretion.
+
+A Chrome extension that blurs images on [diversia.social](https://diversia.social)
+carrying tags you choose. Blurred images show which tags matched; one click
+reveals the picture.
+
+![Blurred thumbnails in a gallery and the sidebar](docs/exempel-utsuddning.png)
+
+<sub>Demo page with placeholder pictures. The overlay and labels are the real
+extension CSS.</sub>
+
+## Install
+
+The extension is not on the Chrome Web Store; install it unpacked.
+
+> **Chrome Web Store:** I currently have no intention of submitting the extension to the
+> Chrome Web Store. Install it using the steps below.
+
+1. Download the latest `Chrome-Diversia-Tagblur-x.y.z.zip` from
+   [Releases](https://github.com/JanJoh/Chrome-Diversia-Tagblur/releases) and unzip it
+   (or `git clone` this repository).
+2. Open `chrome://extensions` and switch on **Developer mode** (top right).
+3. Click **Load unpacked** and select the unzipped folder (the one containing
+   `manifest.json`).
+4. Optional: pin the extension via the puzzle-piece icon in the toolbar.
+
+Works in any Chromium browser that supports Manifest V3 (Chrome, Edge, Brave, Vivaldi).
+
+**Updating:** replace the folder with the new version and press the reload arrow on the
+extension's card in `chrome://extensions`.
+
+## Usage
+
+### 1. Choose tags
+
+Click the extension icon. The panel is in Swedish by default; switch with
+**Språk / Language** in the top right.
+
+<img src="docs/installningar-v3.png" alt="Options panel" width="384">
+
+The tag list (categories and tags, ~240 of them) is **built in**, so it's there from the
+first click. When you open the panel while logged in to diversia, the list is refreshed
+from the site in the background (at most once a day; **Uppdatera / Refresh** forces it).
+
+- **Search** to filter the list, and **tick** the tags to blur. Ticked tags are listed under
+  *Valda / Selected* at the top.
+- **Other tags:** anything not in the list, by name (`Latex/gummi`) or ID (`k40`), one per
+  line. The ID is the value after `?tag=` in a tag link.
+- **Check thumbnails in the background** (on by default): fetches tags for the
+  thumbnails you see, carefully and with pauses. Read [Background checks and
+  anti-scraping](#background-checks-and-anti-scraping) before deciding.
+- **Blur images until they have been checked** (on by default): thumbnails start out
+  blurred and are un-blurred once their tags are known, so a tagged image never flashes up.
+- **Blur strength:** in pixels.
+- **Save.** Open diversia tabs update immediately.
+- **Forget checked images** clears the tag cache (see below).
+
+### 2. Browse
+
+- Matching images are covered with a blur and a label:
+  **Innehåller tag(s): Blod, Nållekar (klicka för att visa)**
+  (in English: *Contains tag(s): … (click to reveal)*).
+  Small thumbnails (like the gallery sidebar) show just the tag names.
+- **Click once** to reveal the picture; click again to open it as usual.
+- Hover for a tooltip with the same text.
+
+## How it works
+
+| Page | Where the tags come from |
+|---|---|
+| Single image (`/pic/?bild=…`) | Read straight from the page. |
+| Gallery for a tag you blocked (`/pic/?tag=…`) | Every thumbnail carries that tag, so all are blurred without further lookups. |
+| Feed, other galleries, the sidebar | Thumbnails carry no tags. The extension fetches each image's tags in the background (see below). |
+
+Results are cached per image for 30 days, so revisiting a page costs nothing. Images you
+open yourself are checked straight from the page, with no extra requests.
+
+## Background checks and anti-scraping
+
+Overview pages (the feed, galleries, the sidebar) don't show image tags. To know whether
+a thumbnail should be blurred, the extension has to fetch that image's tags from the
+site, much like you clicking the thumbnail yourself. It does so carefully:
+
+- **Only thumbnails you can see** (or are about to) are checked. Background tabs make no
+  requests until you look at them.
+- **One at a time** across all diversia tabs together, with a **random pause of 1.5–4
+  seconds** between lookups, and **at most 20 per minute**.
+- The light request the site's own picture switcher uses (`/g.php`, about 35 KB) is used
+  instead of the full image page (about 130 KB) where possible.
+- **If the site answers unexpectedly** (an error, a login page, a block), **all checks
+  pause for 15 minutes.** The panel shows the pause and has a button to resume.
+
+Sites may still have protections against automated traffic, and no pacing is invisible.
+Using background checks is **at your own risk**, and may go against the site's rules.
+
+> **If you don't want to risk triggering anti-scraping protection:** switch off **Check
+> thumbnails in the background**. The extension then makes no background requests at
+> all, but it means **all photos on overview pages may appear blurred**: unchecked
+> thumbnails stay blurred (with *Blur images until they have been checked* on), and only
+> images you open yourself are checked. The same applies during a pause. If you also
+> switch that setting off, unchecked thumbnails are shown normally instead, unfiltered.
+
+The profile picture and header banner have no tags and are never blurred.
+
+## Privacy
+
+- Everything stays in your browser. Settings are kept in Chrome sync storage; the tag
+  cache and tag list in local storage.
+- The extension only runs on `diversia.social` and only talks to `diversia.social`.
+- No analytics, no external requests.
+- The site's right-click/download protection is left untouched; the extension only
+  lays a CSS blur over the elements that display pictures.
+
+## If it stops working
+
+The extension depends on diversia's page markup. If the site changes, these are the
+places to look (`content.js`, `blur.css`):
+
+| What | Selector |
+|---|---|
+| Thumbnail | `a[href*="bild="]` with a background style or an `<img>` inside |
+| Main picture | the `img.picshadow` that is *not* inside a `bild=` link (sidebar thumbnails share the class) |
+| Tags on an image page | `a[href*="/pic/?tag="]` in the same `.row` as the main picture |
+| Full tag list | `.gcats2 a[href*="tag="]` on gallery pages |
+| Tags via the picture switcher | `/g.php?a=…&id=…`; the action word is read from the site's `getpic()` on image pages. If it fails, the full image page is used. |
+
+Issues and pull requests are welcome.
+
+## Development
+
+No build step: edit the files and reload the extension in `chrome://extensions`.
+`./package.sh` builds a release zip containing only the files the extension needs.
+
+## License
+
+[MIT](LICENSE). Not affiliated with or endorsed by diversia.social.

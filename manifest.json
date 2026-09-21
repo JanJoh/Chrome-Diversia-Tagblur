@@ -1,0 +1,46 @@
+{
+  "manifest_version": 3,
+  "name": "Diversia Tag Blur",
+  "version": "0.3.0",
+  "description": "Suddar ut bilder på diversia.social som har taggar du väljer. Klicka på en utsuddad bild för att visa den.",
+  "permissions": [
+    "storage"
+  ],
+  "host_permissions": [
+    "https://diversia.social/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://diversia.social/*"
+      ],
+      "css": [
+        "blur.css"
+      ],
+      "js": [
+        "i18n.js",
+        "content.js"
+      ],
+      "run_at": "document_start"
+    }
+  ],
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": false
+  },
+  "action": {
+    "default_title": "Diversia Tag Blur",
+    "default_popup": "options.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "homepage_url": "https://github.com/JanJoh/Chrome-Diversia-Tagblur"
+}
