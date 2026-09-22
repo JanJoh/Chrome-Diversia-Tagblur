@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8">
+  <title>Diversia Tag Blur</title>
+  <style>
+    body { font: 14px/1.4 system-ui, sans-serif; margin: 12px; width: 360px; color: #222; background: #fff; }
+    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    h1 { font-size: 16px; margin: 0; }
+    header label { font-size: 12px; color: #666; }
+    h2 { font-size: 13px; margin: 10px 0 2px; color: #555; }
+    label.block { display: block; margin: 12px 0 4px; font-weight: 600; }
+    input[type=search], textarea { width: 100%; box-sizing: border-box; }
+    textarea { height: 48px; font: 13px ui-monospace, monospace; }
+    #list { max-height: 260px; overflow-y: auto; border: 1px solid #ccc; padding: 4px 6px; margin-top: 4px; }
+    #list label { display: block; font-weight: normal; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    #list code { color: #888; font-size: 11px; }
+    .hint { color: #666; font-size: 12px; margin: 2px 0; }
+    .row { display: flex; gap: 8px; align-items: center; margin-top: 10px; }
+    input[type=number] { width: 60px; }
+    button { margin-top: 12px; }
+    #status { color: #2a7; margin-left: 8px; }
+    .hint.warn { color: #c0365a; }
+    .hint.note { color: #2a7; }
+    @media (prefers-color-scheme: dark) {
+      body { color: #eee; background: #222; }
+      h2, .hint, header label { color: #aaa; }
+      #list { border-color: #555; }
+      a { color: #8ab4f8; }
+      .hint.warn { color: #ff7a9a; }
+      .hint.note { color: #5ed6a0; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Diversia Tag Blur</h1>
+    <label><span data-i18n="language"></span>
+      <select id="lang">
+        <option value="sv">Svenska</option>
+        <option value="en">English</option>
+      </select>
+    </label>
+  </header>
+
+  <p class="hint note" id="update" hidden><span id="updatetext"></span>
+    <a href="https://github.com/JanJoh/Chrome-Diversia-Tagblur/releases" target="_blank" rel="noopener"
+       data-i18n="updateLink"></a></p>
+
+  <label class="block" for="filter"><span data-i18n="tagsToBlur"></span> <span id="count" class="hint"></span></label>
+  <input type="search" id="filter" data-i18n-placeholder="search">
+  <div id="list"></div>
+  <p class="hint"><span id="listhint"></span> <a href="#" id="refresh" data-i18n="refresh"></a></p>
+
+  <label class="block" for="extra" data-i18n="other"></label>
+  <textarea id="extra" spellcheck="false"></textarea>
+
+  <div class="row">
+    <input type="checkbox" id="lookups">
+    <label for="lookups" data-i18n="lookups"></label>
+  </div>
+  <p class="hint" data-i18n="lookupsHint"></p>
+  <p class="hint warn" id="paused" hidden><span id="pausedtext"></span> <a href="#" id="resume" data-i18n="resume"></a></p>
+
+  <div class="row">
+    <input type="checkbox" id="preblur">
+    <label for="preblur" data-i18n="preblur"></label>
+  </div>
+
+  <div class="row">
+    <label for="blurPx" data-i18n="blurPx"></label>
+    <input type="number" id="blurPx" min="4" max="80">
+  </div>
+
+  <div class="row">
+    <input type="checkbox" id="updateCheck">
+    <label for="updateCheck" data-i18n="updateCheck"></label>
+  </div>
+  <p class="hint" data-i18n="updateCheckHint"></p>
+
+  <button id="save" data-i18n="save"></button>
+  <button id="clear" data-i18n="clear"></button>
+  <span id="status"></span>
+
+  <script src="i18n.js"></script>
+  <script src="options.js"></script>
+</body>
+</html>
