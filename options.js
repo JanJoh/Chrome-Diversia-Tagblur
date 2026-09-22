@@ -1,4 +1,4 @@
-const DEFAULTS = { blocked: [], preblur: true, blurPx: 24, lang: DTB_DEFAULT_LANG, lookups: true };
+const DEFAULTS = { blocked: [], preblur: true, blurPx: 24, lang: DTB_DEFAULT_LANG, lookups: true, updateCheck: true };
 const $ = (id) => document.getElementById(id);
 
 let lang = DTB_DEFAULT_LANG;
@@ -22,6 +22,7 @@ function applyLanguage() {
   renderHint();
   renderList();
   renderPause();
+  renderUpdate();
 }
 
 // ---- lookup pause (set by content.js when the site answers unexpectedly) ----
@@ -149,6 +150,59 @@ async function refreshFromSite() {
   renderHint();
 }
 
+// ---- version check --------------------------------------------------------
+//
+// Once a day, when the panel is opened, ask GitHub for the latest release tag
+// and compare it with this build's version. This is the extension's only
+// request to anything other than diversia.social: no cookies, no headers of
+// our own, nothing about the user or their tags. "Look for new versions"
+// switches it off entirely.
+
+const RELEASE_API = "https://api.github.com/repos/JanJoh/Chrome-Diversia-Tagblur/releases/latest";
+const CHECK_AFTER_MS = 24 * 60 * 60 * 1000;
+const CHECK_KEY = "versionCheck"; // { t, latest }
+
+let latestVersion = null; // tag of the newest release we know of, e.g. "v0.4.0"
+
+// "v0.4.0" -> [0, 4, 0]. Extension versions are 1-4 dot-separated integers.
+const parseVersion = (v) =>
+  String(v).trim().replace(/^v/i, "").split(".").map((n) => parseInt(n, 10) || 0);
+
+function isNewer(a, b) {
+  const [x, y] = [parseVersion(a), parseVersion(b)];
+  for (let i = 0; i < Math.max(x.length, y.length); i++) {
+    if ((x[i] || 0) !== (y[i] || 0)) return (x[i] || 0) > (y[i] || 0);
+  }
+  return false;
+}
+
+function renderUpdate() {
+  const show = !!latestVersion && isNewer(latestVersion, chrome.runtime.getManifest().version);
+  $("update").hidden = !show;
+  if (show) $("updatetext").textContent = t("updateAvailable", { version: latestVersion.replace(/^v/i, "") });
+}
+
+async function checkForUpdate() {
+  const { [CHECK_KEY]: last = {} } = await chrome.storage.local.get(CHECK_KEY);
+  latestVersion = last.latest || null;
+  renderUpdate();
+  if (Date.now() - (last.t || 0) < CHECK_AFTER_MS) return;
+  try {
+    const res = await fetch(RELEASE_API, { credentials: "omit", cache: "no-store" });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const tag = (await res.json()).tag_name;
+    if (!tag) throw new Error("no tag_name in response");
+    latestVersion = tag;
+    await chrome.storage.local.set({ [CHECK_KEY]: { t: Date.now(), latest: tag } });
+    renderUpdate();
+  } catch (e) {
+    // A failed check is not worth telling the user about, and not worth
+    // retrying before tomorrow either: stamp the time, keep the old answer.
+    console.warn("[diversia-tag-blur] version check failed", e);
+    await chrome.storage.local.set({ [CHECK_KEY]: { ...last, t: Date.now() } });
+  }
+}
+
 // ---- init -----------------------------------------------------------------
 
 (async () => {
@@ -164,10 +218,12 @@ async function refreshFromSite() {
   $("extra").value = extra.join("\n");
   $("preblur").checked = s.preblur;
   $("lookups").checked = s.lookups;
+  $("updateCheck").checked = s.updateCheck;
   $("blurPx").value = s.blurPx;
   applyLanguage();
 
   if (tagList.bundled || Date.now() - tagList.t > REFRESH_AFTER_MS) refreshFromSite();
+  if (s.updateCheck) checkForUpdate();
 })();
 
 // Switching language applies at once and is stored straight away, so the
@@ -191,8 +247,14 @@ $("save").addEventListener("click", () => {
   const blurPx = Math.min(80, Math.max(4, parseInt($("blurPx").value, 10) || DEFAULTS.blurPx));
   // Sync storage allows ~8 KB per setting; all 238 tags ticked is ~2 KB, but a
   // huge "other tags" list could exceed it, so report failures.
-  chrome.storage.sync.set({ blocked, preblur: $("preblur").checked, lookups: $("lookups").checked, blurPx, lang }, () =>
-    flash(chrome.runtime.lastError ? "saveFailed" : "saved"));
+  const updateCheck = $("updateCheck").checked;
+  chrome.storage.sync.set(
+    { blocked, preblur: $("preblur").checked, lookups: $("lookups").checked, updateCheck, blurPx, lang },
+    () => flash(chrome.runtime.lastError ? "saveFailed" : "saved"));
+  // Switching the check off takes down a notice it put up; switching it on
+  // asks straight away instead of waiting for the next time the panel opens.
+  if (updateCheck) checkForUpdate();
+  else { latestVersion = null; renderUpdate(); }
 });
 
 $("clear").addEventListener("click", () => {

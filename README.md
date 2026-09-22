@@ -58,6 +58,9 @@ från sajten i bakgrunden (högst en gång per dygn; **Uppdatera** tvingar fram 
   utsuddade från början och visas när deras taggar är kända, så en taggad bild syns
   aldrig ens för ett ögonblick.
 - **Oskärpa (px):** hur mycket bilden suddas.
+- **Sök efter nya versioner** (på som standard): frågar GitHub en gång per dygn om det
+  finns en nyare version, och visar i så fall en rad högst upp i panelen. Se
+  [Versionskontroll](#versionskontroll).
 - **Spara.** Öppna diversia-flikar uppdateras direkt.
 - **Glöm kontrollerade bilder** tömmer cachen med kontrollerade bilder (se nedan).
 
@@ -108,12 +111,32 @@ bakgrundskontroller sker **på egen risk**, och det kan strida mot sajtens regle
 
 Profilbilden och sidhuvudets bild har inga taggar och suddas aldrig ut.
 
+## Versionskontroll
+
+Tillägget installeras uppackat och uppdaterar sig inte självt, så det frågar i stället
+GitHub om det finns en nyare version. När du öppnar panelen, och senast dygnet innan,
+hämtas den senaste utgåvans versionsnummer från
+`https://api.github.com/repos/JanJoh/Chrome-Diversia-Tagblur/releases/latest`
+och jämförs med den installerade versionen. Är den nyare visas en rad högst upp i
+panelen med en länk till [Releases](https://github.com/JanJoh/Chrome-Diversia-Tagblur/releases);
+annars syns ingenting. Misslyckas anropet står det ingenting om det, och nästa försök
+sker tidigast ett dygn senare.
+
+Anropet skickar inga kakor och inga egna huvuden, och innehåller inget om dig, dina
+taggar eller vad du har tittat på — bara en förfrågan om det senaste versionsnumret.
+GitHub ser förstås, som varje webbserver, din IP-adress. Stäng av **Sök efter nya
+versioner** i panelen så görs anropet inte alls; då får du uppdatera manuellt genom att
+titta på Releases-sidan.
+
 ## Integritet
 
 - Allt stannar i din webbläsare. Inställningarna sparas i Chromes synkade lagring,
   cachen och tagglistan i lokal lagring.
-- Tillägget körs bara på `diversia.social` och pratar bara med `diversia.social`.
-- Ingen statistik, inga externa anrop.
+- Tillägget körs bara på `diversia.social` och pratar bara med `diversia.social` — med
+  ett undantag: en återkommande kontroll av om det finns en ny version, högst en gång
+  per dygn, mot GitHubs API. Den kan stängas av, och ingenting om dig skickas med. Se
+  [Versionskontroll](#versionskontroll).
+- Ingen statistik. Inga andra externa anrop än versionskontrollen ovan.
 - Sajtens skydd mot högerklick och nedladdning lämnas orört. Tillägget lägger bara en
   CSS-oskärpa över de element som visar bilder.
 

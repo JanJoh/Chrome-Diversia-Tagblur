@@ -58,6 +58,9 @@ from the site in the background (at most once a day; **Uppdatera / Refresh** for
 - **Blur images until they have been checked** (on by default): thumbnails start out
   blurred and are un-blurred once their tags are known, so a tagged image never flashes up.
 - **Blur strength:** in pixels.
+- **Look for new versions** (on by default): asks GitHub once a day whether a newer
+  version exists, and if so shows a line at the top of the panel. See
+  [Version check](#version-check).
 - **Save.** Open diversia tabs update immediately.
 - **Forget checked images** clears the tag cache (see below).
 
@@ -108,12 +111,33 @@ Using background checks is **at your own risk**, and may go against the site's r
 
 The profile picture and header banner have no tags and are never blurred.
 
+## Version check
+
+The extension is installed unpacked and does not update itself, so it asks GitHub
+whether a newer version exists instead. When you open the panel, and at most once a
+day, it fetches the latest release's version number from
+`https://api.github.com/repos/JanJoh/Chrome-Diversia-Tagblur/releases/latest`
+and compares it with the installed version. If it is newer, a line appears at the top
+of the panel linking to
+[Releases](https://github.com/JanJoh/Chrome-Diversia-Tagblur/releases); otherwise
+nothing is shown. A failed request is not reported, and is not retried before the next
+day.
+
+The request sends no cookies and no headers of its own, and carries nothing about you,
+your tags or what you have looked at — only a question about the latest version number.
+GitHub does of course see your IP address, as any web server would. Switch off **Look
+for new versions** in the panel and the request is not made at all; you then update
+manually by looking at the Releases page.
+
 ## Privacy
 
 - Everything stays in your browser. Settings are kept in Chrome sync storage; the tag
   cache and tag list in local storage.
-- The extension only runs on `diversia.social` and only talks to `diversia.social`.
-- No analytics, no external requests.
+- The extension only runs on `diversia.social` and only talks to `diversia.social` —
+  with one exception: a periodic check for new versions, at most once a day, against
+  GitHub's API. It can be switched off, and sends nothing about you. See
+  [Version check](#version-check).
+- No analytics. No external requests other than the version check above.
 - The site's right-click/download protection is left untouched; the extension only
   lays a CSS blur over the elements that display pictures.
 
