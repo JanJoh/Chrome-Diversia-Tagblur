@@ -42,7 +42,7 @@ zip-fil. Det tar ungefär en minut, och du behöver inte kunna något om kod.
 > Web Store, på addons.mozilla.org eller i App Store. Installera det enligt stegen
 > nedan.
 
-**1. Hämta filen.** Öppna [senaste versionen](https://github.com/JanJoh/Chrome-Diversia-Tagblur/releases/latest) och ladda ner den som passar
+**1. Hämta filen.** Öppna [senaste versionen](https://github.com/JanJoh/Diversia-Tagblur/releases/latest) och ladda ner den som passar
 din webbläsare:
 
 | Fil att ladda ner | För |
@@ -179,9 +179,9 @@ Profilbilden och sidhuvudets bild har inga taggar och suddas aldrig ut.
 Tillägget installeras uppackat och uppdaterar sig inte självt, så det frågar i stället
 GitHub om det finns en nyare version. När du öppnar panelen, och senast dygnet innan,
 hämtas den senaste utgåvans versionsnummer från
-`https://api.github.com/repos/JanJoh/Chrome-Diversia-Tagblur/releases/latest`
+`https://api.github.com/repos/JanJoh/Diversia-Tagblur/releases/latest`
 och jämförs med den installerade versionen. Är den nyare visas en rad högst upp i
-panelen med en länk till [Releases](https://github.com/JanJoh/Chrome-Diversia-Tagblur/releases);
+panelen med en länk till [Releases](https://github.com/JanJoh/Diversia-Tagblur/releases);
 annars syns ingenting. Misslyckas anropet står det ingenting om det, och nästa försök
 sker tidigast ett dygn senare.
 

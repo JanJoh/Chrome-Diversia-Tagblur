@@ -1,6 +1,6 @@
 {
   "name": "diversia-tagblur",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Webbläsartillägg (Chrome, Firefox, Safari): suddar ut bilder på diversia.social som har taggar du väljer",
   "private": true,
   "license": "MIT",

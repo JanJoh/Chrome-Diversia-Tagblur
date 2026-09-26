@@ -42,7 +42,7 @@ file. It takes about a minute and needs no knowledge of code.
 > **The stores:** I have no present intention of publishing to the Chrome Web
 > Store, addons.mozilla.org or the App Store. Install it with the steps below.
 
-**1. Download the file.** Open the [latest release](https://github.com/JanJoh/Chrome-Diversia-Tagblur/releases/latest) and get the one for your
+**1. Download the file.** Open the [latest release](https://github.com/JanJoh/Diversia-Tagblur/releases/latest) and get the one for your
 browser:
 
 | File to download | For |
@@ -180,10 +180,10 @@ The profile picture and header banner have no tags and are never blurred.
 The extension is installed unpacked and does not update itself, so it asks GitHub
 whether a newer version exists instead. When you open the panel, and at most once a
 day, it fetches the latest release's version number from
-`https://api.github.com/repos/JanJoh/Chrome-Diversia-Tagblur/releases/latest`
+`https://api.github.com/repos/JanJoh/Diversia-Tagblur/releases/latest`
 and compares it with the installed version. If it is newer, a line appears at the top
 of the panel linking to
-[Releases](https://github.com/JanJoh/Chrome-Diversia-Tagblur/releases); otherwise
+[Releases](https://github.com/JanJoh/Diversia-Tagblur/releases); otherwise
 nothing is shown. A failed request is not reported, and is not retried before the next
 day.
 

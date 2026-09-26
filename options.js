@@ -162,7 +162,7 @@ async function refreshFromSite() {
 // our own, nothing about the user or their tags. "Look for new versions"
 // switches it off entirely.
 
-const RELEASE_API = "https://api.github.com/repos/JanJoh/Chrome-Diversia-Tagblur/releases/latest";
+const RELEASE_API = "https://api.github.com/repos/JanJoh/Diversia-Tagblur/releases/latest";
 const CHECK_AFTER_MS = 24 * 60 * 60 * 1000;
 // A failed check comes back sooner than a successful one. A check made before
 // the project's first release ever existed must not suppress the notice for a
