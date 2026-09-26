@@ -59,8 +59,8 @@ webbläsaren ska läsa in, inte zip-filen.
 ### Chrome (och Edge, Brave…)
 
 1. Öppna `chrome://extensions` i adressfältet.
-2. Slå på **Utvecklarläge** uppe till höger.
-3. Klicka på **Läs in uppackat** och välj mappen du packade upp.
+2. Slå på **Programmerarläge** uppe till höger.
+3. Klicka på **Läs in opaketerat tillägg** och välj mappen du packade upp.
 4. Valfritt: fäst tillägget via pusselbitsikonen i verktygsfältet.
 
 Tillägget blir kvar tills du tar bort det.
