@@ -193,8 +193,8 @@ titta på Releases-sidan.
 
 ## Integritet
 
-- Allt stannar i din webbläsare. Inställningarna sparas i Chromes synkade lagring,
-  cachen och tagglistan i lokal lagring.
+- Allt stannar i din webbläsare. Inställningarna sparas i webbläsarens synkade
+  lagring, cachen och tagglistan i lokal lagring.
 - Tillägget körs bara på `diversia.social` och pratar bara med `diversia.social` — med
   ett undantag: en återkommande kontroll av om det finns en ny version, högst en gång
   per dygn, mot GitHubs API. Den kan stängas av, och ingenting om dig skickas med. Se

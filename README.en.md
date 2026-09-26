@@ -195,8 +195,8 @@ manually by looking at the Releases page.
 
 ## Privacy
 
-- Everything stays in your browser. Settings are kept in Chrome sync storage; the tag
-  cache and tag list in local storage.
+- Everything stays in your browser. Settings are kept in the browser's sync storage;
+  the tag cache and tag list in local storage.
 - The extension only runs on `diversia.social` and only talks to `diversia.social` —
   with one exception: a periodic check for new versions, at most once a day, against
   GitHub's API. It can be switched off, and sends nothing about you. See
