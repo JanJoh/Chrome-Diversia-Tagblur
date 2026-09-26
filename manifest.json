@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Diversia Tag Blur",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "Suddar ut bilder p\u00e5 diversia.social som har taggar du v\u00e4ljer. Klicka p\u00e5 en utsuddad bild f\u00f6r att visa den.",
   "permissions": [
     "storage"
