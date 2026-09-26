@@ -1,6 +1,11 @@
 (() => {
   "use strict";
 
+  // Firefox and Safari expose `browser` with promises; Chrome exposes `chrome`.
+  // Promise-style calls work in all three, callbacks only in Chrome, so every
+  // call below is written as a promise.
+  const ext = globalThis.browser || globalThis.chrome;
+
   const DEFAULTS = { blocked: [], preblur: true, blurPx: 24, lang: DTB_DEFAULT_LANG, lookups: true };
   const CACHE_KEY = "tagCache";
   const CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000; // tags rarely change
@@ -74,7 +79,7 @@
     const boxes = document.querySelectorAll(".gcats2");
     if (!boxes.length) return;
     const tags = tagsFromLinks([...boxes].flatMap((b) => [...b.querySelectorAll(TAG_LINK_SEL)]));
-    if (tags.length) chrome.storage.local.set({ tagList: { tags, t: Date.now() } });
+    if (tags.length) ext.storage.local.set({ tagList: { tags, t: Date.now() } });
   }
 
   // Image pages carry the site's own picture switcher, getpic(), in an inline
@@ -83,9 +88,9 @@
   async function learnAction() {
     const inline = [...document.scripts].filter((s) => !s.src).map((s) => s.textContent).join("\n");
     const found = (inline.match(/g\.php\?a=([A-Za-z0-9_]+)/) || [])[1];
-    const { [ACTION_KEY]: stored = {} } = await chrome.storage.local.get(ACTION_KEY);
+    const { [ACTION_KEY]: stored = {} } = await ext.storage.local.get(ACTION_KEY);
     if (found && found !== stored.value && found !== stored.failed) {
-      await chrome.storage.local.set({ [ACTION_KEY]: { ...stored, value: found } });
+      await ext.storage.local.set({ [ACTION_KEY]: { ...stored, value: found } });
       stored.value = found;
     }
     gAction = stored.value && stored.value !== stored.failed ? stored.value : null;
@@ -104,9 +109,9 @@
     clearTimeout(saveTimer);
     // Merge with what other tabs have stored meanwhile instead of overwriting.
     saveTimer = setTimeout(async () => {
-      const { [CACHE_KEY]: stored = {} } = await chrome.storage.local.get(CACHE_KEY);
+      const { [CACHE_KEY]: stored = {} } = await ext.storage.local.get(CACHE_KEY);
       cache = { ...stored, ...cache };
-      await chrome.storage.local.set({ [CACHE_KEY]: cache });
+      await ext.storage.local.set({ [CACHE_KEY]: cache });
     }, 1000);
   }
 
@@ -124,7 +129,7 @@
   // pacing and the per-minute cap hold across tabs, not per tab.
   async function withLookupSlot(fn) {
     const run = async () => {
-      const { [STATE_KEY]: st = {} } = await chrome.storage.local.get(STATE_KEY);
+      const { [STATE_KEY]: st = {} } = await ext.storage.local.get(STATE_KEY);
       if ((st.pausedUntil || 0) > Date.now()) return { paused: st.pausedUntil };
       let now = Date.now();
       const recent = (st.recent || []).filter((t) => now - t < 60000);
@@ -141,7 +146,7 @@
         next.reason = result.fail;
         console.warn(`[diversia-tag-blur] lookups paused 15 min: ${result.fail}`);
       }
-      await chrome.storage.local.set({ [STATE_KEY]: next });
+      await ext.storage.local.set({ [STATE_KEY]: next });
       return result;
     };
     return navigator.locks ? navigator.locks.request(LOCK_NAME, run) : run();
@@ -162,8 +167,8 @@
       if (tags) return { tags };
       if (viaFragment) {
         // Stop using this action word; the full page is the fallback from now on.
-        const { [ACTION_KEY]: stored = {} } = await chrome.storage.local.get(ACTION_KEY);
-        await chrome.storage.local.set({ [ACTION_KEY]: { ...stored, failed: gAction } });
+        const { [ACTION_KEY]: stored = {} } = await ext.storage.local.get(ACTION_KEY);
+        await ext.storage.local.set({ [ACTION_KEY]: { ...stored, failed: gAction } });
         gAction = null;
       }
       return { fail: `unexpected response for image ${id} (HTTP ${res.status})` };
@@ -226,7 +231,7 @@
 
         // Paused (now or by another tab): keep the id, try again afterwards.
         queue.unshift(id);
-        const { [STATE_KEY]: st = {} } = await chrome.storage.local.get(STATE_KEY);
+        const { [STATE_KEY]: st = {} } = await ext.storage.local.get(STATE_KEY);
         clearTimeout(resumeTimer);
         resumeTimer = setTimeout(pump, Math.max(0, (st.pausedUntil || 0) - Date.now()) + 1000);
         break;
@@ -348,26 +353,25 @@
 
   // ---- boot ---------------------------------------------------------------
 
-  chrome.storage.sync.get(DEFAULTS, (s) => {
-    applySettings(s);
-    chrome.storage.local.get({ [CACHE_KEY]: {} }, async (c) => {
-      cache = c[CACHE_KEY];
-      pruneCache();
-      const start = async () => {
-        harvestTagList();
-        await learnAction();
-        scan();
-        new MutationObserver((muts) => {
-          if (blockedSet.size === 0) return;
-          checkMainPic();
-          for (const m of muts) for (const n of m.addedNodes) if (n.nodeType === 1) scanThumbs(n.parentElement || n);
-        }).observe(document.body, { childList: true, subtree: true });
-      };
-      document.readyState === "loading" ? document.addEventListener("DOMContentLoaded", start) : start();
-    });
-  });
+  (async () => {
+    applySettings(await ext.storage.sync.get(DEFAULTS));
+    const c = await ext.storage.local.get({ [CACHE_KEY]: {} });
+    cache = c[CACHE_KEY];
+    pruneCache();
+    const start = async () => {
+      harvestTagList();
+      await learnAction();
+      scan();
+      new MutationObserver((muts) => {
+        if (blockedSet.size === 0) return;
+        checkMainPic();
+        for (const m of muts) for (const n of m.addedNodes) if (n.nodeType === 1) scanThumbs(n.parentElement || n);
+      }).observe(document.body, { childList: true, subtree: true });
+    };
+    document.readyState === "loading" ? document.addEventListener("DOMContentLoaded", start) : start();
+  })();
 
-  chrome.storage.onChanged.addListener((changes, area) => {
+  ext.storage.onChanged.addListener((changes, area) => {
     if (area === "local") {
       // Cleared from the options page.
       if (changes[CACHE_KEY] && !changes[CACHE_KEY].newValue) cache = {};
@@ -380,6 +384,6 @@
       if (changes[STATE_KEY] && !(changes[STATE_KEY].newValue?.pausedUntil > Date.now())) pump();
       return;
     }
-    if (area === "sync") chrome.storage.sync.get(DEFAULTS, (s) => { applySettings(s); rescanAll(); });
+    if (area === "sync") ext.storage.sync.get(DEFAULTS).then((s) => { applySettings(s); rescanAll(); });
   });
 })();

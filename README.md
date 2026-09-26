@@ -6,33 +6,110 @@
 > med generativ AI (Claude). Ingen korrekturläsning eller oberoende granskning har
 > gjorts. Använd efter eget omdöme.
 
-Ett Chrome-tillägg som suddar ut bilder på [diversia.social](https://diversia.social)
-som har taggar du väljer. Utsuddade bilder visar vilka taggar som matchade, och ett
+Ett webbläsartillägg för **Chrome, Firefox och Safari** som suddar ut bilder på
+[diversia.social](https://diversia.social) som har taggar du väljer. Utsuddade bilder visar vilka taggar som matchade, och ett
 klick visar bilden.
 
 ![Utsuddade miniatyrer i ett galleri och i sidopanelen](docs/exempel-utsuddning.png)
 
 <sub>Demosida med påhittade bilder. Överlägget och texterna är tilläggets riktiga CSS.</sub>
 
+## Innehåll
+
+- [Installation](#installation)
+  - [Chrome (och Edge, Brave…)](#chrome-och-edge-brave)
+  - [Firefox](#firefox)
+  - [Safari (Mac)](#safari-mac)
+  - [Bygga själv](#bygga-själv)
+- [Användning](#användning)
+  - [1. Välj taggar](#1-välj-taggar)
+  - [2. Surfa](#2-surfa)
+- [Så fungerar det](#så-fungerar-det)
+- [Bakgrundskontroller](#bakgrundskontroller)
+- [Versionskontroll](#versionskontroll)
+- [Integritet](#integritet)
+- [Om det slutar fungera](#om-det-slutar-fungera)
+- [Utveckling](#utveckling)
+  - [Att det fungerar i tre webbläsare](#att-det-fungerar-i-tre-webbläsare)
+- [Licens](#licens)
+
 ## Installation
 
-Tillägget finns inte i Chrome Web Store, utan installeras "uppackat".
+Tillägget finns inte i någon webbläsarbutik, så du installerar det själv från en
+zip-fil. Det tar ungefär en minut, och du behöver inte kunna något om kod.
 
-> **Chrome Web Store:** jag har i dagsläget ingen avsikt att publicera tillägget i
-> Chrome Web Store. Installera det enligt stegen nedan.
+> **Butikerna:** jag har i dagsläget ingen avsikt att publicera tillägget i Chrome
+> Web Store, på addons.mozilla.org eller i App Store. Installera det enligt stegen
+> nedan.
 
-1. Ladda ner senaste `Chrome-Diversia-Tagblur-x.y.z.zip` från
-   [Releases](https://github.com/JanJoh/Chrome-Diversia-Tagblur/releases) och packa upp
-   den (eller `git clone` det här repot).
-2. Öppna `chrome://extensions` och slå på **Utvecklarläge** (uppe till höger).
-3. Klicka på **Läs in okomprimerat tillägg** och välj den uppackade mappen (den som
-   innehåller `manifest.json`).
+**1. Hämta filen.** Öppna [senaste versionen](https://github.com/JanJoh/Chrome-Diversia-Tagblur/releases/latest) och ladda ner den som passar
+din webbläsare:
+
+| Fil att ladda ner | För |
+|---|---|
+| `diversia-tagblur-chrome-*.zip` | Chrome, Edge, Brave, Opera, Vivaldi |
+| `diversia-tagblur-firefox-*.zip` | Firefox 140 eller senare, på dator och Android |
+| `diversia-tagblur-safari-*.zip` | Safari på macOS, iOS och iPadOS |
+
+**2. Packa upp den.** Dubbelklicka på zip-filen. Du får en mapp — det är den som
+webbläsaren ska läsa in, inte zip-filen.
+
+**3. Läs in mappen.** Följ stegen för din webbläsare nedan.
+
+### Chrome (och Edge, Brave…)
+
+1. Öppna `chrome://extensions` i adressfältet.
+2. Slå på **Utvecklarläge** uppe till höger.
+3. Klicka på **Läs in uppackat** och välj mappen du packade upp.
 4. Valfritt: fäst tillägget via pusselbitsikonen i verktygsfältet.
 
-Fungerar i alla Chromium-webbläsare med stöd för Manifest V3 (Chrome, Edge, Brave, Vivaldi).
+Tillägget blir kvar tills du tar bort det.
 
 **Uppdatera:** ersätt mappen med den nya versionen och klicka på ladda om-pilen på
 tilläggets kort i `chrome://extensions`.
+
+### Firefox
+
+Kräver Firefox 140 eller senare.
+
+1. Öppna `about:debugging#/runtime/this-firefox`.
+2. Klicka på **Läs in temporärt tillägg…** och välj filen `manifest.json` inuti
+   mappen.
+
+Det ligger kvar tills Firefox startas om, och måste läsas in igen efter det. Det är
+Firefox som fungerar så med tillägg som inte kommer från deras butik.
+
+**Behörigheter:** i Firefox bestämmer du själv över sidåtkomst. Om inget suddas ut
+på Diversia klickar du på Tillägg (pusselbiten) och tillåter tillägget på den sajten.
+
+### Safari (Mac)
+
+Kräver Safari 26 eller senare.
+
+1. Gå till Safari → Inställningar → **Utvecklare**. Syns den inte, slå först på
+   *Visa funktioner för webbutvecklare* under Avancerat.
+2. Klicka på **Lägg till temporärt tillägg…** och välj mappen du packade upp.
+
+Det laddas ur när Safari avslutas, så lägg till det igen efter omstart.
+
+**Behörigheter:** Safari ber dig tillåta tillägget per webbplats. Välj *Tillåt alltid
+på den här webbplatsen* för Diversia.
+
+**På iPhone och iPad** går det inte att läsa in ett tillägg för hand. Safari-tillägg
+måste komma från App Store, vilket kräver Apple Developer Program — se
+[Bygga själv](#bygga-själv) nedan.
+
+### Bygga själv
+
+Bara om du vill bygga från källkoden i stället för att hämta en färdig fil:
+
+```bash
+npm run build
+```
+
+Det skapar `dist/chrome`, `dist/firefox` och `dist/safari` att läsa in, plus en zip
+per webbläsare. Roten i förrådet är också ett giltigt Chrome-tillägg, så den går att
+läsa in direkt.
 
 ## Användning
 
@@ -142,8 +219,40 @@ ställena att titta på (`content.js`, `blur.css`):
 
 ## Utveckling
 
-Inget byggsteg: ändra filerna och ladda om tillägget i `chrome://extensions`.
-`./package.sh` bygger en zip för release med bara de filer tillägget behöver.
+Inget byggsteg för att köra koden: ändra filerna och ladda om tillägget i
+`chrome://extensions`. Roten i förrådet är ett giltigt Chrome-tillägg.
+
+```bash
+npm run build   # dist/{chrome,firefox,safari} + en zip per webbläsare
+npm test        # paketen är kompletta, och koden går att köra i alla tre
+```
+
+Testerna kräver inget annat än Node: de kontrollerar att varje paket innehåller
+det manifestet hänvisar till, att manifesten har rätt form per webbläsare, och att
+koden använder `browser`/`chrome`-skalet i stället för `chrome.*` direkt.
+
+| Fil | Vad den gör |
+|---|---|
+| `content.js` | Hittar miniatyrer och huvudbilder, slår upp taggar och suddar |
+| `blur.css` | Överlägget, taggetiketterna och hur en visad bild ser ut |
+| `options.html`, `options.js` | Panelen: tagglista, egna taggar, oskärpa, språk, versionskontroll |
+| `i18n.js` | Svenska och engelska strängar, delade av panelen och sidan |
+| `tags.json` | Tagglistan som följer med, innan den uppdaterats från sajten |
+| `scripts/build.mjs` | Manifest och paket per webbläsare |
+| `test/build.test.mjs` | Att de tre paketen är kompletta och rätt formade |
+| `test/shim.test.mjs` | Att inget anrop är Chrome-bara: inga callbacks till `storage`, ingen `lastError` |
+
+### Att det fungerar i tre webbläsare
+
+Koden använder bara API:er som Chrome, Firefox och Safari alla har, genom
+`globalThis.browser || globalThis.chrome`. Anropen till `storage` är skrivna som
+löften, eftersom `browser.storage` i Firefox och Safari struntar i en callback och
+den då aldrig hade körts. Firefox-paketet linteras rent av Mozillas egen
+`web-ext lint`.
+
+**Firefox och Safari är byggda och paketerade men ännu inte provkörda i de
+webbläsarna.** Det som är kontrollerat är paketens form och att inga Chrome-bara
+anrop finns kvar.
 
 ## Licens
 

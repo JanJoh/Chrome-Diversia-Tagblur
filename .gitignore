@@ -1,2 +1,23 @@
+# Dependencies and build output
+node_modules/
 dist/
+
+# Test and tooling leftovers
+coverage/
+*.log
+npm-debug.log*
+web-ext-artifacts/
+
+# Local environment
+.env
+.env.*
+!.env.example
+
+# Editor and OS
 .DS_Store
+.AppleDouble
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*~
